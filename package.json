@@ -1,0 +1,15 @@
+{
+  "name": "debuglog-perf",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "debuglog benchmark",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "author": "fengmk2",
+  "license": "MIT",
+  "dependencies": {
+    "mitata": "^1.0.34"
+  }
+}
