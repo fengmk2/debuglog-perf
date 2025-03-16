@@ -10,6 +10,7 @@
   "author": "fengmk2",
   "license": "MIT",
   "dependencies": {
+    "debug": "^4.4.0",
     "mitata": "^1.0.34"
   }
 }
