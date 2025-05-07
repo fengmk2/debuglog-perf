@@ -1,5 +1,7 @@
 # debuglog perf issues
 
+> Updates: This issues had been fixed in Node.js >= `22.15.0` and `24.0.0`
+
 ## `noop` debug logger has a performance cost
 
 Even though the `NODE_DEBUG` environment variable doesn't enable debugging, Node.js' built-in [debuglog](https://nodejs.org/docs/latest/api/util.html#utildebuglogsection-callback) logic still has performance issues.
@@ -283,4 +285,132 @@ summary
    41.71x faster than debugjs()
    41.75x faster than debugjs(arg1)
    42.79x faster than debugjs(arg1, arg2)
+```
+
+## Fixes was landed in Node.js >= 22.15.0
+
+```bash
+clk: ~2.82 GHz
+cpu: Apple M1
+runtime: node 22.15.0 (arm64-darwin)
+
+benchmark                                  avg (min … max) p75 / p99    (min … top 1%)
+---------------------------------------------------------- -------------------------------
+debug()                                     212.50 ps/iter 213.62 ps         █            
+                                    (183.11 ps … 31.86 ns) 234.13 ps         █   ▇        
+                                   (  0.06  b …  46.81  b)   0.10  b ▁▁▁▁▁▁▁▁█▁▁▁█▁▁▁▃▁▁▁▁
+
+debug(arg1)                                 211.71 ps/iter 213.62 ps         █            
+                                    (183.11 ps … 50.42 ns) 234.13 ps         █            
+                                   (  0.10  b …  69.62  b)   0.10  b ▁▁▁▁▁▁▁▁█▁▁▁█▁▁▁▃▁▁▁▂
+
+debug(arg1, arg2)                           799.25 ps/iter 691.65 ps  █                   
+                                     (467.77 ps … 1.04 µs)   2.09 ns ▄█▂                  
+                                   (  0.12  b …  26.12  b)  16.01  b ████▆▃▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+debug(arg1, arg2, arg3)                     210.82 ps/iter 213.62 ps         █            
+                                    (183.11 ps … 52.28 ns) 233.89 ps         █   ▃        
+                                   (  0.10  b …  84.15  b)   0.10  b ▁▁▁▁▁▁▁▁█▁▁▁█▁▁▁▂▁▁▁▁
+
+debug(arg1, arg2, arg3, arg4)               217.21 ps/iter 213.62 ps         █            
+                                   (183.11 ps … 192.00 ns) 234.13 ps         █   ▇        
+                                   (  0.10  b … 104.15  b)   0.10  b ▁▁▁▁▁▁▁▁█▁▁▁█▁▁▁▅▁▁▁▂
+
+debug(arg1, arg2, arg3, arg4, arg5)           2.15 ns/iter   1.84 ns █                    
+                                     (1.13 ns … 240.08 ns)  26.45 ns █▃                   
+                                   (  0.12  b …  42.05  b)  41.94  b ██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+debug(arg1, arg2, arg3, arg4, arg5, arg6)   951.67 ps/iter 793.46 ps  █                   
+                                   (508.54 ps … 193.89 ns)   3.58 ns  █                   
+                                   (  0.12  b …  39.25  b)  16.01  b ███▄▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+debugjs()                                     7.29 ns/iter   6.93 ns █                    
+                                     (6.67 ns … 292.10 ns)  15.28 ns █                    
+                                   (  0.10  b … 144.29  b)   0.18  b ██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+debugjs(arg1)                                 6.90 ns/iter   6.84 ns   █                  
+                                      (6.67 ns … 39.79 ns)   8.39 ns   █                  
+                                   (  0.10  b …  47.37  b)   0.12  b ▁▁█▂▁▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+debugjs(arg1, arg2)                           8.41 ns/iter   8.08 ns █                    
+                                      (7.67 ns … 62.87 ns)  27.83 ns █                    
+                                   (  0.02  b …  48.90  b)  37.81  b █▄▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+debugjs(arg1, arg2, arg3)                     6.92 ns/iter   6.87 ns   █                  
+                                      (6.70 ns … 32.29 ns)   8.12 ns   █                  
+                                   (  0.02  b …  43.27  b)   0.13  b ▃▂█▄▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+debugjs(arg1, arg2, arg3, arg4)               7.93 ns/iter   7.27 ns █                    
+                                       (6.72 ns … 1.70 µs)  23.90 ns █▇                   
+                                   (  0.01  b …  32.02  b)   0.04  b ██▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+debugjs(arg1, arg2, arg3, arg4, arg5)         6.89 ns/iter   6.84 ns  █                   
+                                      (6.57 ns … 40.06 ns)  11.34 ns  █                   
+                                   (  0.02  b …  39.27  b)   0.13  b ▃█▃▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+debugjs(arg1, arg2, arg3, arg4, arg5, arg6)   6.84 ns/iter   6.76 ns  █                   
+                                      (6.59 ns … 32.87 ns)   9.71 ns  █                   
+                                   (  0.02  b …  50.02  b)   0.04  b ▅█▃▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+
+                                            ┌                                            ┐
+                                            ┬
+                                    debug() │
+                                            ┴
+                                            ┬
+                                debug(arg1) │
+                                            ┴
+                                            ╷┬ ╷
+                          debug(arg1, arg2) ├│─┤
+                                            ╵┴ ╵
+                                            ┬
+                    debug(arg1, arg2, arg3) │
+                                            ┴
+                                            ┬
+              debug(arg1, arg2, arg3, arg4) │
+                                            ┴
+                                              ┌┬                                       ╷
+        debug(arg1, arg2, arg3, arg4, arg5)   ││───────────────────────────────────────┤
+                                              └┴                                       ╵
+                                             ┬    ╷
+  debug(arg1, arg2, arg3, arg4, arg5, arg6)  │────┤
+                                             ┴    ╵
+                                                       ┌┬            ╷
+                                  debugjs()            ││────────────┤
+                                                       └┴            ╵
+                                                       ┬ ╷
+                              debugjs(arg1)            │─┤
+                                                       ┴ ╵
+                                                        ╷┬                               ╷
+                        debugjs(arg1, arg2)             ├│───────────────────────────────┤
+                                                        ╵┴                               ╵
+                                                       ┬ ╷
+                  debugjs(arg1, arg2, arg3)            │─┤
+                                                       ┴ ╵
+                                                       ┌─┬                         ╷
+            debugjs(arg1, arg2, arg3, arg4)            │ │─────────────────────────┤
+                                                       └─┴                         ╵
+                                                      ╷┬      ╷
+      debugjs(arg1, arg2, arg3, arg4, arg5)           ├│──────┤
+                                                      ╵┴      ╵
+                                                      ╷┬    ╷
+debugjs(arg1, arg2, arg3, arg4, arg5, arg6)           ├│────┤
+                                                      ╵┴    ╵
+                                            └                                            ┘
+                                            183.11 ps          14.01 ns           27.83 ns
+
+summary
+  debug(arg1, arg2, arg3)
+   1x faster than debug(arg1)
+   1.01x faster than debug()
+   1.03x faster than debug(arg1, arg2, arg3, arg4)
+   3.79x faster than debug(arg1, arg2)
+   4.51x faster than debug(arg1, arg2, arg3, arg4, arg5, arg6)
+   10.18x faster than debug(arg1, arg2, arg3, arg4, arg5)
+   32.45x faster than debugjs(arg1, arg2, arg3, arg4, arg5, arg6)
+   32.69x faster than debugjs(arg1, arg2, arg3, arg4, arg5)
+   32.72x faster than debugjs(arg1)
+   32.82x faster than debugjs(arg1, arg2, arg3)
+   34.57x faster than debugjs()
+   37.61x faster than debugjs(arg1, arg2, arg3, arg4)
+   39.9x faster than debugjs(arg1, arg2)
 ```
